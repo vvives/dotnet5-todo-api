@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using TodoApi.Model;
 using TodoApi.Model.Requests;
-using TodoApi.Repositories;
+using TodoApi.Services;
 
 namespace TodoApi.Controllers
 {
@@ -26,9 +26,9 @@ namespace TodoApi.Controllers
     public class TodoController : ControllerBase
     {
         /// <summary>
-        /// The todo repository.
+        /// The todo service.
         /// </summary>
-        private readonly ITodoRepository todoRepository;
+        private readonly ITodoService todoService;
 
         /// <summary>
         /// The logger.
@@ -38,11 +38,11 @@ namespace TodoApi.Controllers
         /// <summary>
         /// Initializes a new instance of the <see cref="TodoController" /> class.
         /// </summary>
-        /// <param name="todoRepository">The todo repository.</param>
+        /// <param name="todoService">The todo service.</param>
         /// <param name="logger">The logger.</param>
-        public TodoController(ITodoRepository todoRepository, ILogger<TodoItem> logger)
+        public TodoController(ITodoService todoService, ILogger<TodoItem> logger)
         {
-            this.todoRepository = todoRepository;
+            this.todoService = todoService;
             this.logger = logger;
         }
 
@@ -65,7 +65,7 @@ namespace TodoApi.Controllers
                 IsComplete = false,
             };
 
-            todoItem = await this.todoRepository.Create(todoItem).ConfigureAwait(false);
+            todoItem = await this.todoService.Create(todoItem).ConfigureAwait(false);
 
             this.logger.LogInformation("The new todo item has been created successfully.");
 
@@ -84,7 +84,7 @@ namespace TodoApi.Controllers
         {
             this.logger.LogInformation($"Trying to retrieve the todo item with identifier {id}.");
 
-            TodoItem todoItem = await this.todoRepository.Read(id).ConfigureAwait(false);
+            TodoItem todoItem = await this.todoService.Read(id).ConfigureAwait(false);
 
             if (todoItem == null)
             {
@@ -111,18 +111,18 @@ namespace TodoApi.Controllers
         {
             this.logger.LogInformation($"Trying to update the todo item with identifier {id}.");
 
-            if (!this.todoRepository.Exists(id))
+            if (!this.todoService.Exists(id))
             {
                 this.logger.LogError($"The todo item with identifier {id} has not been found.");
 
                 return NotFound();
             }
 
-            TodoItem todoItem = await this.todoRepository.Read(id).ConfigureAwait(false);
+            TodoItem todoItem = await this.todoService.Read(id).ConfigureAwait(false);
             todoItem.Description = request.Description;
             todoItem.IsComplete = request.IsComplete;
 
-            await this.todoRepository.Update(todoItem);
+            await this.todoService.Update(todoItem);
 
             this.logger.LogInformation($"The todo item with identifier {id} has been updated successfully.");
 
@@ -141,14 +141,14 @@ namespace TodoApi.Controllers
         {
             this.logger.LogInformation($"Trying to remove the todo item with identifier {id}.");
 
-            if (!this.todoRepository.Exists(id))
+            if (!this.todoService.Exists(id))
             {
                 this.logger.LogError($"The todo item with identifier {id} has not been found.");
 
                 return NotFound();
             }
 
-            await this.todoRepository.Delete(id);
+            await this.todoService.Delete(id);
 
             this.logger.LogInformation($"The todo item with identifier {id} has been removed successfully.");
 
@@ -166,7 +166,7 @@ namespace TodoApi.Controllers
         {
             this.logger.LogInformation("Trying to retrieve all todo items.");
 
-            IEnumerable<TodoItem> todoItems = await this.todoRepository.GetAll().ConfigureAwait(false);
+            IEnumerable<TodoItem> todoItems = await this.todoService.GetAll().ConfigureAwait(false);
 
             this.logger.LogInformation("All todo items were retrieved successfully.");
 

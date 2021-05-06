@@ -6,21 +6,22 @@
  */
 
 using Microsoft.EntityFrameworkCore;
+
 using TodoApi.Model;
 
 namespace TodoApi.Context
 {
     /// <summary>
-    /// The todo context.
+    /// The application context.
     /// </summary>
     /// <seealso cref="Microsoft.EntityFrameworkCore.DbContext" />
-    public class TodoContext : DbContext
+    public class ApplicationContext : DbContext
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TodoContext"/> class.
+        /// Initializes a new instance of the <see cref="ApplicationContext"/> class.
         /// </summary>
         /// <param name="options">The options.</param>
-        public TodoContext(DbContextOptions<TodoContext> options)
+        public ApplicationContext(DbContextOptions<ApplicationContext> options)
             : base(options)
         {
         }
@@ -32,5 +33,14 @@ namespace TodoApi.Context
         /// The todo items.
         /// </value>
         public DbSet<TodoItem> TodoItems { get; set; }
+
+        /// <summary>
+        /// Called when [model creating].
+        /// </summary>
+        /// <param name="builder">The builder.</param>
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            builder.Entity<TodoItem>().ToTable("TodoItem");
+        }
     }
 }

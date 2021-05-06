@@ -6,33 +6,31 @@
  */
 
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
-using Microsoft.EntityFrameworkCore;
-using TodoApi.Context;
 using TodoApi.Model;
+using TodoApi.Repositories;
 
-namespace TodoApi.Repositories
+namespace TodoApi.Services
 {
     /// <summary>
-    /// The todo repository class.
+    /// The todo service.
     /// </summary>
-    /// <seealso cref="TodoApi.Repositories.ITodoRepository" />
-    public class TodoRepository : ITodoRepository
+    /// <seealso cref="TodoApi.Services.ITodoService" />
+    public class TodoService : ITodoService
     {
         /// <summary>
-        /// The context.
+        /// The todo repository.
         /// </summary>
-        private readonly ApplicationContext context;
+        private readonly ITodoRepository todoRepository;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TodoRepository"/> class.
+        /// Initializes a new instance of the <see cref="TodoService"/> class.
         /// </summary>
-        /// <param name="context">The context.</param>
-        public TodoRepository(ApplicationContext context)
+        /// <param name="todoRepository">The todo repository.</param>
+        public TodoService(ITodoRepository todoRepository)
         {
-            this.context = context;
+            this.todoRepository = todoRepository;
         }
 
         /// <summary>
@@ -42,13 +40,8 @@ namespace TodoApi.Repositories
         /// <returns>
         /// The created todo item.
         /// </returns>
-        public async Task<TodoItem> Create(TodoItem todoItem)
-        {
-            context.TodoItems.Add(todoItem);
-            await context.SaveChangesAsync();
-
-            return todoItem;
-        }
+        public Task<TodoItem> Create(TodoItem todoItem) =>
+            this.todoRepository.Create(todoItem);
 
         /// <summary>
         /// Reads the todo item with the specified identifier.
@@ -57,10 +50,8 @@ namespace TodoApi.Repositories
         /// <returns>
         /// The item with the specified identifier.
         /// </returns>
-        public async Task<TodoItem> Read(int id)
-        {
-            return await context.TodoItems.FindAsync(id);
-        }
+        public Task<TodoItem> Read(int id) =>
+            this.todoRepository.Read(id);
 
         /// <summary>
         /// Updates the todo item with specified identifier.
@@ -69,24 +60,18 @@ namespace TodoApi.Repositories
         /// <returns>
         /// Nothing.
         /// </returns>
-        public async Task<TodoItem> Update(TodoItem todoItem)
-        {
-            context.Entry(todoItem).State = EntityState.Modified;
-            await context.SaveChangesAsync();
-
-            return todoItem;
-        }
+        public Task<TodoItem> Update(TodoItem todoItem) =>
+            this.todoRepository.Update(todoItem);
 
         /// <summary>
-        /// Deletes the specified todo item.
+        /// Deletes the todo item with the specified identifier.
         /// </summary>
         /// <param name="id">The todo item identifier.</param>
-        public async Task Delete(int id)
-        {
-            TodoItem todoItem = await context.TodoItems.FindAsync(id);
-            context.TodoItems.Remove(todoItem);
-            await context.SaveChangesAsync();
-        }
+        /// <returns>
+        /// Nothing.
+        /// </returns>
+        public Task Delete(int id) =>
+            this.todoRepository.Delete(id);
 
         /// <summary>
         /// Gets all todo items.
@@ -94,10 +79,8 @@ namespace TodoApi.Repositories
         /// <returns>
         /// A list with the todo items.
         /// </returns>
-        public async Task<IList<TodoItem>> GetAll()
-        {
-            return await context.Set<TodoItem>().ToListAsync();
-        }
+        public Task<IList<TodoItem>> GetAll() =>
+            this.todoRepository.GetAll();
 
         /// <summary>
         /// Checks if the specified todo item exists.
@@ -107,6 +90,6 @@ namespace TodoApi.Repositories
         ///   <c>true</c> if this instance exists; otherwise, <c>false</c>.
         /// </returns>
         public bool Exists(int id) =>
-            context.TodoItems.Any(todoItem => todoItem.Id == id);
+            this.todoRepository.Exists(id);
     }
 }

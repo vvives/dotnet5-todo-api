@@ -13,6 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using TodoApi.Context;
 using TodoApi.Repositories;
+using TodoApi.Services;
 
 namespace TodoApi
 {
@@ -46,11 +47,13 @@ namespace TodoApi
         public void ConfigureServices(IServiceCollection services)
         {
             // Register application database context.
-            services.AddDbContext<TodoContext>(options => options.UseInMemoryDatabase("TodoList"));
+            services.AddDbContext<ApplicationContext>(options => options.UseInMemoryDatabase("TodoList"));
 
-            // Register repositories.
+            // Register repositories and services.
             services.AddScoped<ITodoRepository, TodoRepository>();
+            services.AddScoped<ITodoService, TodoService>();
 
+            // Register controllers.
             services.AddControllers();
 
             // Register the Swagger generator, defining one or more Swagger documents.
